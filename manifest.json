@@ -1,0 +1,8 @@
+{
+  "name": "web-notification-counter-badge",
+  "description": "Chrome extension that displays as badge the notification count of a web app",
+  "version": "0.2",
+  "manifest_version": 3,
+  "action": {
+  }
+}
