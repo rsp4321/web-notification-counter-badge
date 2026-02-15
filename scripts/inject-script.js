@@ -56,7 +56,7 @@ if (!ModNotification_runned) {
     // export class ModNotification extends NativeNotification {
         // static #count = 0;
 
-        constructor(title, options = { }) {
+        constructor(title, options = null) {
             console.log("constructed")
             // onTimestampClick()
             //new OriginalNotification(title,options)
