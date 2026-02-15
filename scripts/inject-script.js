@@ -31,35 +31,56 @@
 // if (!NativeNotification) {
 if (!ModNotification_runned) {
 
+
+    class NotificationBadgeCounter {
+        static #count = 0;
+
+        static incrementCount() {
+            this.#count++;
+            console.log("Count incremented: "+ this.#count);
+        }
+
+        static decrementCount() {
+            this.#count--;
+            console.log("Count decremented: "+ this.#count);
+        }
+
+
+    }
+
     // const NativeNotification = Notification;
     var NativeNotification = Notification;
 
 
     class ModNotification extends NativeNotification {
     // export class ModNotification extends NativeNotification {
-        static #count = 0;
+        // static #count = 0;
 
         constructor(title, options = { }) {
             console.log("constructed")
             // onTimestampClick()
             //new OriginalNotification(title,options)
 
-            super(title,options)
+            if (options)
+                super(title,options);
+            else
+                super(title);
 
-            Notification.#incrementCount();
+            // Notification.#incrementCount();
+            NotificationBadgeCounter.incrementCount();
         }
 
-        static #incrementCount() {
-            this.#count++;
-            console.log("Count incremented: "+ this.#count);
-        }
+        // static #incrementCount() {
+        //     this.#count++;
+        //     console.log("Count incremented: "+ this.#count);
+        // }
 
-        static #decrementCount() {
-            this.#count--;
-            console.log("Count decremented: "+ this.#count);
-        }
+        // static #decrementCount() {
+        //     this.#count--;
+        //     console.log("Count decremented: "+ this.#count);
+        // }
 
-        onclose = (event) => { Notification.#decrementCount(); };
+        // onclose = (event) => { Notification.#decrementCount(); };
     };
 
     Notification = ModNotification;
@@ -72,6 +93,43 @@ if (!ModNotification_runned) {
 }
 
 console.log("Injected script running!");
+
+
+// var count = 0;
+
+// function countSWNotifications() {
+async function countSWNotifications() {
+    // const options = { tag: "user_alerts" };
+
+    // var count = 0;
+    let count = 0;
+
+    // navigator.serviceWorker.ready.then((registration) => {
+
+        // count += registration.getNotifications().length;
+
+        // registration.getNotifications(options).then((notifications) => {
+        // registration.getNotifications().then((notifications) => {
+            // do something with your notifications
+            // console.log("Created notification from SW");
+        //     count++;
+        // });
+    // });
+
+    let registrations = await navigator.serviceWorker.getRegistrations();
+    let reg_id;
+    let notifications;
+    
+    for (reg_id in registrations) {
+
+        // count += await registrations[reg_id].getNotifications().length;
+        notifications = await registrations[reg_id].getNotifications();
+        count += notifications.length;
+        
+    };
+
+    return count;
+};
 
 // TODO: Overload notification object destroy function to update counter
 
