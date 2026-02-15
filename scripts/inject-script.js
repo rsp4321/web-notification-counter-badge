@@ -31,10 +31,12 @@
 // if (!NativeNotification) {
 if (!ModNotification_runned) {
 
-    const NativeNotification = Notification;
+    // const NativeNotification = Notification;
+    var NativeNotification = Notification;
 
 
     class ModNotification extends NativeNotification {
+    // export class ModNotification extends NativeNotification {
         static #count = 0;
 
         constructor(title, options = { }) {
@@ -49,16 +51,22 @@ if (!ModNotification_runned) {
 
         static #incrementCount() {
             this.#count++;
+            console.log("Count incremented: "+ this.#count);
         }
 
         static #decrementCount() {
             this.#count--;
+            console.log("Count decremented: "+ this.#count);
         }
 
         onclose = (event) => { Notification.#decrementCount(); };
     };
 
     Notification = ModNotification;
+
+    window.Notification = ModNotification;
+    
+    // window.Notification = ModNotification.bind(window);
 
     var ModNotification_runned = true
 }
