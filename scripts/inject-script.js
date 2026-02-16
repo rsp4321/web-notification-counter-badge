@@ -80,13 +80,76 @@ if (!ModNotification_runned) {
             // onTimestampClick()
             //new OriginalNotification(title,options)
 
+            
+
             if (options)
                 super(title,options);
             else
                 super(title);
 
+            // super.addEventListener("close", this.onclose);
+            // super.addEventListener("close", this.extonclose);
+            // this.addEventListener("close", this.extonclose);
+            // this.addEventListener("close", () => {});
+            this.addEventListener("close", (event) => {});
+            // super.addEventListener("close", this.#onclose);
+            // super.addEventListener("click", this.onclick);
+
             // Notification.#incrementCount();
             NotificationBadgeCounter.incrementCount();
+        }
+
+        // #orig_listener = () => {};
+        #orig_listener = (event) => {};
+
+        addEventListener(event,listener, options = null) {
+
+
+            if (event === "close") {
+
+                this.#orig_listener = listener;
+
+                // this.extonclose = this.extonclose.bind(this);
+                // this.#orig_listener = this.#orig_listener.bind(this);
+
+                super.removeEventListener(event,this.extonclose);
+
+                if (options == null) {
+                    super.addEventListener(event,this.extonclose);
+                }
+                // else if (typeof options === "boolean") {
+
+                // }
+                else {
+                    super.addEventListener(event,this.extonclose,options);
+                }
+            }
+            else {
+
+                if (options == null) 
+                    super.addEventListener(event,listener);
+                else 
+                    super.addEventListener(event,listener,options);
+            }  
+            
+        }
+
+        removeEventListener(event,listener, options = null) {
+
+
+            if (event === "close") {
+
+                // this.#orig_listener = () => {};
+                this.#orig_listener = (event) => {};
+            }
+            else {
+
+                if (options == null) 
+                    super.removeEventListener(event,listener);
+                else 
+                    super.removeEventListener(event,listener,options);
+            }  
+            
         }
 
         // static #incrementCount() {
@@ -100,6 +163,19 @@ if (!ModNotification_runned) {
         // }
 
         // onclose = (event) => { Notification.#decrementCount(); };
+        // onclose(event) { NotificationBadgeCounter.decrementCount(); };
+        // onclose() { NotificationBadgeCounter.decrementCount(); };
+
+        // extonclose() { 
+        extonclose(event) { 
+
+            NotificationBadgeCounter.decrementCount(); 
+
+            // this.#orig_listener();
+            this.#orig_listener(event);
+        };
+        
+        // onclick() { NotificationBadgeCounter.decrementCount(); };
     };
 
     Notification = ModNotification;
