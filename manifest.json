@@ -1,7 +1,7 @@
 {
   "name": "web-notification-counter-badge",
   "description": "Chrome extension that displays as badge the notification count of a web app",
-  "version": "0.4",
+  "version": "0.5",
   "manifest_version": 3,
   "action": {
   },
@@ -9,24 +9,21 @@
     {
       "js": ["scripts/content.js"],
       "matches": [
-        "https://info.cern.ch/hypertext/*",
-        "https://web-push-book.gauntface.com/demos/notification-examples/*",
-        "https://davidwalsh.name/demo/*"
+        "https://*/*",
+        "http://*/*"
       ]
     }
   ],
   "host_permissions": [
-    "https://info.cern.ch/hypertext/*",
-    "https://web-push-book.gauntface.com/demos/notification-examples/*",
-    "https://davidwalsh.name/demo/*"
+    "https://*/*",
+    "http://*/*"
   ],
   "web_accessible_resources": [
     {
       "resources": [ "scripts/inject-script.js" ],
       "matches": [
-        "https://info.cern.ch/*",
-        "https://web-push-book.gauntface.com/*",
-        "https://davidwalsh.name/*"
+        "https://*/*",
+        "http://*/*"
       ]
     }
   ]
