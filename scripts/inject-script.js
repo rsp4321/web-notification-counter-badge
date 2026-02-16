@@ -33,20 +33,39 @@ if (!ModNotification_runned) {
 
 
     class NotificationBadgeCounter {
-        static #count = 0;
+        static #window_obj_count = 0;
+        static #sw_obj_count = 0;
+        static #total_count = 0;
 
         static incrementCount() {
-            this.#count++;
-            console.log("Count incremented: "+ this.#count);
+            this.#window_obj_count++;
+            // this.#total_count = this.#sw_obj_count + this.#window_obj_count;
+            this.reloadCount();
+            console.log("Count incremented: "+ this.#window_obj_count);
         }
 
         static decrementCount() {
-            this.#count--;
-            console.log("Count decremented: "+ this.#count);
+            this.#window_obj_count--;
+            // this.#total_count = this.#sw_obj_count + this.#window_obj_count;
+            this.reloadCount();
+            console.log("Count decremented: "+ this.#window_obj_count);
         }
 
+        static setSWObjCount(count = 0) {
+            this.#sw_obj_count = count;
+            // this.#total_count = this.#sw_obj_count + this.#window_obj_count;
+            this.reloadCount();
+            console.log("SW notification count setted: "+ this.#sw_obj_count);
+        }
 
+        static reloadCount() {
+            this.#total_count = this.#sw_obj_count + this.#window_obj_count;
+            navigator.setAppBadge(this.#total_count);
+            console.log("Count reloaded: "+ this.#total_count);
+        }
     }
+
+    var class_NotificationBadgeCounter = NotificationBadgeCounter;
 
     // const NativeNotification = Notification;
     var NativeNotification = Notification;
@@ -129,7 +148,15 @@ async function countSWNotifications() {
     };
 
     return count;
+    // NotificationBadgeCounter.setSWObjCount(count);
 };
+
+setInterval(
+    async (NotificationBadgeCounter) => { 
+        count = await countSWNotifications();
+        NotificationBadgeCounter.setSWObjCount( count );
+    },
+    2000, class_NotificationBadgeCounter);
 
 // TODO: Overload notification object destroy function to update counter
 
