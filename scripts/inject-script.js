@@ -65,35 +65,139 @@ if (!ModNotification_runned) {
         }
     }
 
+    async function createSWNotification(title, options = null) {
+        // const options = { tag: "user_alerts" };
+
+
+        // let registrations = await navigator.serviceWorker.getRegistrations();
+        let registration = await navigator.serviceWorker.ready;
+
+        if (!registration) {
+            // throw new Error("Doesn't have SW registration!");
+
+            // TODO: get extension SW registration
+        }
+
+        let tag_notification;
+        let options_final;
+
+        if (options) {
+            if (options.tag)
+                tag_notification = options.tag;
+            else {
+                tag_notification = self.crypto.randomUUID();
+                options.tag = tag_notification;
+            }
+
+            options_final = options;
+        }    
+        else {
+            tag_notification = self.crypto.randomUUID();
+            // tag_notification = "user_alerts"
+            options_final = {
+                tag: tag_notification
+            };
+        }
+
+        registration.showNotification(title,options_final);
+
+        let notifications;
+        let o2 = {tag: tag_notification};
+        // notifications = await registration.getNotifications({tag: tag_notification});
+        notifications = await registration.getNotifications(o2);
+
+        // return count;
+        return notifications[0];
+    };
+
     var class_NotificationBadgeCounter = NotificationBadgeCounter;
 
     // const NativeNotification = Notification;
     var NativeNotification = Notification;
 
 
-    class ModNotification extends NativeNotification {
+    // class ModNotification extends NativeNotification {
+    class ModNotification {
     // export class ModNotification extends NativeNotification {
         // static #count = 0;
+        #obj_native_not = null;
 
         constructor(title, options = null) {
             console.log("constructed")
             // onTimestampClick()
             //new OriginalNotification(title,options)
 
-            
+            // if (options)
+            //     this.#init(title,options).then(() => {});
+            // else
+            //     this.#init(title).then(() => {});
 
-            if (options)
-                super(title,options);
-            else
-                super(title);
+            if (options){
+                // super(title,options);
+
+                // let registrations = await navigator.serviceWorker.getRegistrations();
+
+                createSWNotification(title,options).then((notification) => {
+                    this.#obj_native_not = notification;
+                    this.#obj_native_not.addEventListener("close", (event) => {});
+                    // NotificationBadgeCounter.incrementCount();
+                });
+
+
+            }
+            else {
+                // super(title);
+                createSWNotification(title).then((notification) => {
+                    this.#obj_native_not = notification;
+                    this.#obj_native_not.addEventListener("close", (event) => {});
+                    // NotificationBadgeCounter.incrementCount();
+                });
+            };
+
+
+            // Wait for notification construction
+            // while (!this.#obj_native_not) {
+            //     console.log("Verifying SW notification creation...");
+            // };
 
             // super.addEventListener("close", this.onclose);
             // super.addEventListener("close", this.extonclose);
             // this.addEventListener("close", this.extonclose);
             // this.addEventListener("close", () => {});
-            this.addEventListener("close", (event) => {});
+            // this.addEventListener("close", (event) => {});
             // super.addEventListener("close", this.#onclose);
             // super.addEventListener("click", this.onclick);
+
+            // Notification.#incrementCount();
+            // NotificationBadgeCounter.incrementCount();
+        }
+
+        async #init(title,options = null) {
+
+
+            if (options){
+                // super(title,options);
+
+                // let registrations = await navigator.serviceWorker.getRegistrations();
+
+                // createSWNotification(title,options).then((notification) => {this.#obj_native_not = notification;});
+                this.#obj_native_not = await createSWNotification(title,options);
+            }
+            else
+                // super(title);
+                // createSWNotification(title).then((notification) => {this.#obj_native_not = notification;});
+                this.#obj_native_not = await createSWNotification(title);
+
+
+
+            // super.addEventListener("close", this.onclose);
+            // super.addEventListener("close", this.extonclose);
+            // this.addEventListener("close", this.extonclose);
+            // this.addEventListener("close", () => {});
+            // this.addEventListener("close", (event) => {});
+            // super.addEventListener("close", this.#onclose);
+            // super.addEventListener("click", this.onclick);
+            this.#obj_native_not.addEventListener("close", (event) => {});
 
             // Notification.#incrementCount();
             NotificationBadgeCounter.incrementCount();
@@ -189,8 +293,6 @@ if (!ModNotification_runned) {
 
 console.log("Injected script running!");
 
-
-// var count = 0;
 
 // function countSWNotifications() {
 async function countSWNotifications() {

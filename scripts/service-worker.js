@@ -2,12 +2,12 @@
 
 // function getTabId() { ... }
 
-  async function getCurrentTab() {
-    let queryOptions = { active: true, lastFocusedWindow: true };
-    // `tab` will either be a `tabs.Tab` instance or `undefined`.
-    let [tab] = await chrome.tabs.query(queryOptions);
-    return tab;
-  }
+async function getCurrentTab() {
+  let queryOptions = { active: true, lastFocusedWindow: true };
+  // `tab` will either be a `tabs.Tab` instance or `undefined`.
+  let [tab] = await chrome.tabs.query(queryOptions);
+  return tab;
+}
 
 // function injectScript() {
 function injectScript(tab_id) {
@@ -21,15 +21,15 @@ function injectScript(tab_id) {
       .then(() => console.log("script injected"));
 }
 
-chrome.tabs.onCreated.addListener(
-  // (tab) => {injectScript()},
-  (tab_id) => {injectScript(tab_id)},
-);
+// chrome.tabs.onCreated.addListener(
+//   // (tab) => {injectScript()},
+//   (tab_id) => {injectScript(tab_id)},
+// );
 
-chrome.tabs.onUpdated.addListener(
-  // (tab) => {injectScript()},
-  (tab_id) => {injectScript(tab_id)},
-);
+// chrome.tabs.onUpdated.addListener(
+//   // (tab) => {injectScript()},
+//   (tab_id) => {injectScript(tab_id)},
+// );
 
 
 // const ALARM_NAME = 'check-alarm';
