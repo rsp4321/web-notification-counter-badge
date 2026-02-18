@@ -144,6 +144,11 @@ if (!ModNotification_runned) {
         // static #count = 0;
         #obj_native_not = null;
 
+        static permission = NativeNotification.permission;
+
+        //   static readonly attribute unsigned long maxActions;
+        static maxActions = NativeNotification.maxActions; 
+
         constructor(title, options = null) {
             console.log("constructed")
             // onTimestampClick()
@@ -170,6 +175,9 @@ if (!ModNotification_runned) {
 
                     this.#obj_native_not.addEventListener("close", (event) => {});
                     // NotificationBadgeCounter.incrementCount();
+
+                    this.syncNativeObjProperties();
+                    ModNotification.syncStaticNativeObjProperties();
                 });
 
 
@@ -187,6 +195,9 @@ if (!ModNotification_runned) {
 
                     this.#obj_native_not.addEventListener("close", (event) => {});
                     // NotificationBadgeCounter.incrementCount();
+
+                    this.syncNativeObjProperties();
+                    ModNotification.syncStaticNativeObjProperties();
                 });
             };
 
@@ -206,6 +217,9 @@ if (!ModNotification_runned) {
 
             // Notification.#incrementCount();
             // NotificationBadgeCounter.incrementCount();
+
+            // this.syncNativeObjProperties();
+            // ModNotification.syncStaticNativeObjProperties();
         }
 
         // async #init(title,options = null) {
@@ -277,6 +291,7 @@ if (!ModNotification_runned) {
                     this.#obj_native_not.addEventListener(event,listener,options);
             }  
             
+            this.syncNativeObjProperties();
         }
 
         removeEventListener(event,listener, options = null) {
@@ -297,6 +312,7 @@ if (!ModNotification_runned) {
                     this.#obj_native_not.removeEventListener(event,listener,options);
             }  
             
+            this.syncNativeObjProperties();
         }
 
         // static #incrementCount() {
@@ -324,13 +340,53 @@ if (!ModNotification_runned) {
         
         // onclick() { NotificationBadgeCounter.decrementCount(); };
 
+        static syncStaticNativeObjProperties() {
+            //   static readonly attribute NotificationPermission permission;
+            ModNotification.permission = NativeNotification.permission;
+
+            //   static readonly attribute unsigned long maxActions;
+            ModNotification.maxActions = NativeNotification.maxActions;
+        }
+
+        syncNativeObjProperties(){
+
+
+            //   attribute EventHandler onclick;
+            //   attribute EventHandler onshow;
+            //   attribute EventHandler onerror;
+            //   attribute EventHandler onclose;
+
+            this.title = this.#obj_native_not.title;
+            this.dir = this.#obj_native_not.dir;
+            this.lang = this.#obj_native_not.lang;
+            this.body = this.#obj_native_not.body;
+            //   readonly attribute USVString navigate;
+            this.tag = this.#obj_native_not.tag;
+            this.image = this.#obj_native_not.image;
+            this.icon = this.#obj_native_not.icon;
+            this.badge = this.#obj_native_not.badge;
+            this.vibrate = this.#obj_native_not.vibrate;
+            this.timestamp = this.#obj_native_not.timestamp;
+            this.renotify = this.#obj_native_not.renotify;
+            this.silent = this.#obj_native_not.silent;
+            this.requireInteraction = this.#obj_native_not.requireInteraction;
+            this.data = this.#obj_native_not.data;
+            this.actions = this.#obj_native_not.actions;
+        }
+
         // Proxy functions to mimic and send to native notification object
         static requestPermission(callback = null){
 
+            let return_call
             if (callback)
-                return NativeNotification.requestPermission(callback);
+                // return NativeNotification.requestPermission(callback);
+                return_call = NativeNotification.requestPermission(callback);
             else
-                return NativeNotification.requestPermission();
+                // return NativeNotification.requestPermission();
+                return_call =  NativeNotification.requestPermission();
+
+            this.syncStaticNativeObjProperties();
+            return return_call;
         }
     };
 
