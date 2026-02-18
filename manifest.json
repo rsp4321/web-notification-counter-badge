@@ -14,9 +14,6 @@
       ]
     }
   ],
-  "background": {
-    "service_worker": "scripts/service-worker.js"
-  },
   "host_permissions": [
     "https://*/*",
     "http://*/*"
@@ -24,6 +21,13 @@
   "web_accessible_resources": [
     {
       "resources": [ "scripts/inject-script.js" ],
+      "matches": [
+        "https://*/*",
+        "http://*/*"
+      ]
+    }
+    ,{
+      "resources": [ "scripts/service-worker.js" ],
       "matches": [
         "https://*/*",
         "http://*/*"

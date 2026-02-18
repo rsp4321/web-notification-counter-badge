@@ -65,18 +65,31 @@ if (!ModNotification_runned) {
         }
     }
 
+    async function doAsyncDelay(time_ms) {
+        // console.log("Start: Before delay");
+        return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve();
+                    }, time_ms);
+            });
+        // console.log("End: After "+ time_ms +" miliseconds");
+    };
+
     async function createSWNotification(title, options = null) {
         // const options = { tag: "user_alerts" };
 
 
-        // let registrations = await navigator.serviceWorker.getRegistrations();
-        let registration = await navigator.serviceWorker.ready;
+        let registrations = await navigator.serviceWorker.getRegistrations();
 
-        if (!registration) {
+        if (registrations.length == 0) {
             // throw new Error("Doesn't have SW registration!");
+            console.log("No SW registration found! Fallbacking to native notification objects...");
+            return null;
 
             // TODO: get extension SW registration
         }
+
+        let registration = await navigator.serviceWorker.ready;
 
         let tag_notification;
         let options_final;
@@ -103,8 +116,17 @@ if (!ModNotification_runned) {
 
         let notifications;
         let o2 = {tag: tag_notification};
+        
         // notifications = await registration.getNotifications({tag: tag_notification});
-        notifications = await registration.getNotifications(o2);
+        // notifications = await registration.getNotifications(o2);
+
+        // while (!notifications) {
+        do {
+            // The delay is necessary to guarantee that the browser finishes the SW notification register logic. 
+            // Without this, the browser can fail to register and can't get the notification object
+            await doAsyncDelay(1500);   
+            notifications = await registration.getNotifications(o2);
+        } while (notifications.length == 0);
 
         // return count;
         return notifications[0];
@@ -138,7 +160,14 @@ if (!ModNotification_runned) {
                 // let registrations = await navigator.serviceWorker.getRegistrations();
 
                 createSWNotification(title,options).then((notification) => {
-                    this.#obj_native_not = notification;
+                    
+                    // fallback to native notification if the method fail (return null)
+                    if (notification)
+                        this.#obj_native_not = notification;
+                    else {
+                        this.#obj_native_not = new NativeNotification(title,options);
+                    }
+
                     this.#obj_native_not.addEventListener("close", (event) => {});
                     // NotificationBadgeCounter.incrementCount();
                 });
@@ -148,7 +177,14 @@ if (!ModNotification_runned) {
             else {
                 // super(title);
                 createSWNotification(title).then((notification) => {
-                    this.#obj_native_not = notification;
+                    
+                    // fallback to native notification if the method fail (return null)
+                    if (notification)
+                        this.#obj_native_not = notification;
+                    else {
+                        this.#obj_native_not = new NativeNotification(title,options);
+                    }
+
                     this.#obj_native_not.addEventListener("close", (event) => {});
                     // NotificationBadgeCounter.incrementCount();
                 });
@@ -172,36 +208,36 @@ if (!ModNotification_runned) {
             // NotificationBadgeCounter.incrementCount();
         }
 
-        async #init(title,options = null) {
+        // async #init(title,options = null) {
 
 
-            if (options){
-                // super(title,options);
+        //     if (options){
+        //         // super(title,options);
 
-                // let registrations = await navigator.serviceWorker.getRegistrations();
+        //         // let registrations = await navigator.serviceWorker.getRegistrations();
 
-                // createSWNotification(title,options).then((notification) => {this.#obj_native_not = notification;});
-                this.#obj_native_not = await createSWNotification(title,options);
-            }
-            else
-                // super(title);
-                // createSWNotification(title).then((notification) => {this.#obj_native_not = notification;});
-                this.#obj_native_not = await createSWNotification(title);
+        //         // createSWNotification(title,options).then((notification) => {this.#obj_native_not = notification;});
+        //         this.#obj_native_not = await createSWNotification(title,options);
+        //     }
+        //     else
+        //         // super(title);
+        //         // createSWNotification(title).then((notification) => {this.#obj_native_not = notification;});
+        //         this.#obj_native_not = await createSWNotification(title);
 
 
 
-            // super.addEventListener("close", this.onclose);
-            // super.addEventListener("close", this.extonclose);
-            // this.addEventListener("close", this.extonclose);
-            // this.addEventListener("close", () => {});
-            // this.addEventListener("close", (event) => {});
-            // super.addEventListener("close", this.#onclose);
-            // super.addEventListener("click", this.onclick);
-            this.#obj_native_not.addEventListener("close", (event) => {});
+        //     // super.addEventListener("close", this.onclose);
+        //     // super.addEventListener("close", this.extonclose);
+        //     // this.addEventListener("close", this.extonclose);
+        //     // this.addEventListener("close", () => {});
+        //     // this.addEventListener("close", (event) => {});
+        //     // super.addEventListener("close", this.#onclose);
+        //     // super.addEventListener("click", this.onclick);
+        //     this.#obj_native_not.addEventListener("close", (event) => {});
 
-            // Notification.#incrementCount();
-            NotificationBadgeCounter.incrementCount();
-        }
+        //     // Notification.#incrementCount();
+        //     NotificationBadgeCounter.incrementCount();
+        // }
 
         // #orig_listener = () => {};
         #orig_listener = (event) => {};
@@ -280,6 +316,15 @@ if (!ModNotification_runned) {
         };
         
         // onclick() { NotificationBadgeCounter.decrementCount(); };
+
+        // Proxy functions to mimic and send to native notification object
+        static requestPermission(callback = null){
+
+            if (callback)
+                return NativeNotification.requestPermission(callback);
+            else
+                return NativeNotification.requestPermission();
+        }
     };
 
     Notification = ModNotification;
@@ -335,6 +380,33 @@ setInterval(
         NotificationBadgeCounter.setSWObjCount( count );
     },
     2000, class_NotificationBadgeCounter);
+
+const registerWNCBExtServiceWorker = async (sw_file_path) => {
+  if ('serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.register(
+        // 'sw.js',
+        sw_file_path,
+        {
+          scope: './',
+        }
+      );
+      if (registration.installing) {
+        console.log('Service worker installing');
+      } else if (registration.waiting) {
+        console.log('Service worker installed');
+      } else if (registration.active) {
+        console.log('Service worker active');
+      }
+    } catch (error) {
+      console.error(`Registration failed with ${error}`);
+    }
+  }
+};
+
+// var WNCBExtServiceWorker = document.getElementById("WNCBExtServiceWorker").value;
+// registerWNCBExtServiceWorker(WNCBExtServiceWorker);
+
 
 // TODO: Overload notification object destroy function to update counter
 
