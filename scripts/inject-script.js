@@ -252,24 +252,29 @@ if (!ModNotification_runned) {
                 // this.extonclose = this.extonclose.bind(this);
                 // this.#orig_listener = this.#orig_listener.bind(this);
 
-                super.removeEventListener(event,this.extonclose);
+                // super.removeEventListener(event,this.extonclose);
+                this.#obj_native_not.removeEventListener(event,this.extonclose);
 
                 if (options == null) {
-                    super.addEventListener(event,this.extonclose);
+                    // super.addEventListener(event,this.extonclose);
+                    this.#obj_native_not.addEventListener(event,this.extonclose);
                 }
                 // else if (typeof options === "boolean") {
 
                 // }
                 else {
-                    super.addEventListener(event,this.extonclose,options);
+                    // super.addEventListener(event,this.extonclose,options);
+                    this.#obj_native_not.addEventListener(event,this.extonclose,options);
                 }
             }
             else {
 
                 if (options == null) 
-                    super.addEventListener(event,listener);
+                    // super.addEventListener(event,listener);
+                    this.#obj_native_not.addEventListener(event,listener);
                 else 
-                    super.addEventListener(event,listener,options);
+                    // super.addEventListener(event,listener,options);
+                    this.#obj_native_not.addEventListener(event,listener,options);
             }  
             
         }
