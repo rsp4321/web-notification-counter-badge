@@ -290,9 +290,11 @@ if (!ModNotification_runned) {
             else {
 
                 if (options == null) 
-                    super.removeEventListener(event,listener);
+                    // super.removeEventListener(event,listener);
+                    this.#obj_native_not.removeEventListener(event,listener);
                 else 
-                    super.removeEventListener(event,listener,options);
+                    // super.removeEventListener(event,listener,options);
+                    this.#obj_native_not.removeEventListener(event,listener,options);
             }  
             
         }
