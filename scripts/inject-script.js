@@ -143,6 +143,7 @@ if (!ModNotification_runned) {
     // export class ModNotification extends NativeNotification {
         // static #count = 0;
         #obj_native_not = null;
+        #promise_not = null;
 
         static permission = NativeNotification.permission;
 
@@ -164,7 +165,7 @@ if (!ModNotification_runned) {
 
                 // let registrations = await navigator.serviceWorker.getRegistrations();
 
-                createSWNotification(title,options).then((notification) => {
+                this.#promise_not = createSWNotification(title,options).then((notification) => {
                     
                     // fallback to native notification if the method fail (return null)
                     if (notification)
@@ -178,13 +179,22 @@ if (!ModNotification_runned) {
 
                     this.syncNativeObjProperties();
                     ModNotification.syncStaticNativeObjProperties();
+
+                    this.#promise_not = null;
                 });
+
+                // try {
+                //     await createSWNotification(title,options);
+
+                // } catch (error) {
+                //     console.log("Error!"); 
+                // }
 
 
             }
             else {
                 // super(title);
-                createSWNotification(title).then((notification) => {
+                this.#promise_not = createSWNotification(title).then((notification) => {
                     
                     // fallback to native notification if the method fail (return null)
                     if (notification)
@@ -198,6 +208,8 @@ if (!ModNotification_runned) {
 
                     this.syncNativeObjProperties();
                     ModNotification.syncStaticNativeObjProperties();
+
+                    this.#promise_not = null;
                 });
             };
 
@@ -257,41 +269,53 @@ if (!ModNotification_runned) {
         #orig_listener = (event) => {};
 
         addEventListener(event,listener, options = null) {
+            
+            if (this.#promise_not) {
+                this.#promise_not.then(() => {
 
+                    if (options)
+                        this.addEventListener(event,listener,options);
+                    else
+                        this.addEventListener(event,listener);
 
-            if (event === "close") {
-
-                this.#orig_listener = listener;
-
-                // this.extonclose = this.extonclose.bind(this);
-                // this.#orig_listener = this.#orig_listener.bind(this);
-
-                // super.removeEventListener(event,this.extonclose);
-                this.#obj_native_not.removeEventListener(event,this.extonclose);
-
-                if (options == null) {
-                    // super.addEventListener(event,this.extonclose);
-                    this.#obj_native_not.addEventListener(event,this.extonclose);
-                }
-                // else if (typeof options === "boolean") {
-
-                // }
-                else {
-                    // super.addEventListener(event,this.extonclose,options);
-                    this.#obj_native_not.addEventListener(event,this.extonclose,options);
-                }
+                });
             }
             else {
 
-                if (options == null) 
-                    // super.addEventListener(event,listener);
-                    this.#obj_native_not.addEventListener(event,listener);
-                else 
-                    // super.addEventListener(event,listener,options);
-                    this.#obj_native_not.addEventListener(event,listener,options);
-            }  
-            
-            this.syncNativeObjProperties();
+                if (event === "close") {
+
+                    this.#orig_listener = listener;
+
+                    // this.extonclose = this.extonclose.bind(this);
+                    // this.#orig_listener = this.#orig_listener.bind(this);
+
+                    // super.removeEventListener(event,this.extonclose);
+                    this.#obj_native_not.removeEventListener(event,this.extonclose);
+
+                    if (options == null) {
+                        // super.addEventListener(event,this.extonclose);
+                        this.#obj_native_not.addEventListener(event,this.extonclose);
+                    }
+                    // else if (typeof options === "boolean") {
+
+                    // }
+                    else {
+                        // super.addEventListener(event,this.extonclose,options);
+                        this.#obj_native_not.addEventListener(event,this.extonclose,options);
+                    }
+                }
+                else {
+
+                    if (options == null) 
+                        // super.addEventListener(event,listener);
+                        this.#obj_native_not.addEventListener(event,listener);
+                    else 
+                        // super.addEventListener(event,listener,options);
+                        this.#obj_native_not.addEventListener(event,listener,options);
+                }  
+                
+                this.syncNativeObjProperties();
+            }
         }
 
         removeEventListener(event,listener, options = null) {
