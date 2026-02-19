@@ -320,23 +320,35 @@ if (!ModNotification_runned) {
 
         removeEventListener(event,listener, options = null) {
 
+            if (this.#promise_not) {
+                this.#promise_not.then(() => {
 
-            if (event === "close") {
+                    if (options)
+                        this.removeEventListener(event,listener,options);
+                    else
+                        this.removeEventListener(event,listener);
 
-                // this.#orig_listener = () => {};
-                this.#orig_listener = (event) => {};
+                });
             }
             else {
 
-                if (options == null) 
-                    // super.removeEventListener(event,listener);
-                    this.#obj_native_not.removeEventListener(event,listener);
-                else 
-                    // super.removeEventListener(event,listener,options);
-                    this.#obj_native_not.removeEventListener(event,listener,options);
-            }  
-            
-            this.syncNativeObjProperties();
+                if (event === "close") {
+
+                    // this.#orig_listener = () => {};
+                    this.#orig_listener = (event) => {};
+                }
+                else {
+
+                    if (options == null) 
+                        // super.removeEventListener(event,listener);
+                        this.#obj_native_not.removeEventListener(event,listener);
+                    else 
+                        // super.removeEventListener(event,listener,options);
+                        this.#obj_native_not.removeEventListener(event,listener,options);
+                }  
+                
+                this.syncNativeObjProperties();
+            };
         }
 
         // static #incrementCount() {
@@ -414,16 +426,35 @@ if (!ModNotification_runned) {
         }
 
         dispatchEvent(event) {
-            return_call = this.#obj_native_not.dispatchEvent(event);
-            
-            // return this.#obj_native_not.dispatchEvent(event);
-            this.syncNativeObjProperties();
-            ModNotification.syncStaticNativeObjProperties();
-            return return_call;
+
+            if (this.#promise_not) {
+                this.#promise_not.then(() => {
+
+                    return this.dispatchEvent(event);
+
+                });
+            }
+            else {
+                return_call = this.#obj_native_not.dispatchEvent(event);
+                
+                // return this.#obj_native_not.dispatchEvent(event);
+                this.syncNativeObjProperties();
+                ModNotification.syncStaticNativeObjProperties();
+                return return_call;
+            };
         }
 
         close() {
-            return this.#obj_native_not.close();
+
+            if (this.#promise_not) {
+                this.#promise_not.then(() => {
+
+                    this.close();
+
+                });
+            }
+            else
+                this.#obj_native_not.close();
         }
     };
 
