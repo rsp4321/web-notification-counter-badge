@@ -383,10 +383,23 @@ if (!ModNotification_runned) {
                 return_call = NativeNotification.requestPermission(callback);
             else
                 // return NativeNotification.requestPermission();
-                return_call =  NativeNotification.requestPermission();
+                return_call = NativeNotification.requestPermission();
 
             this.syncStaticNativeObjProperties();
             return return_call;
+        }
+
+        dispatchEvent(event) {
+            return_call = this.#obj_native_not.dispatchEvent(event);
+            
+            // return this.#obj_native_not.dispatchEvent(event);
+            this.syncNativeObjProperties();
+            ModNotification.syncStaticNativeObjProperties();
+            return return_call;
+        }
+
+        close() {
+            return this.#obj_native_not.close();
         }
     };
 
